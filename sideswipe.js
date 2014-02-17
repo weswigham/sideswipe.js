@@ -1,17 +1,20 @@
+/* jshint browser: true, jquery: true */
+/* global Hammer: false */
 
 (function() {
-
+  'use strict';
+  
   var tend_evt = "transitionend webkitTransitionEnd oTransitionEnd msTransitionEnd";
 
-  function transitionTo(selector, url, dir, speed, easing) {
-    var speed = speed || 800;
-    var easing = easing || "ease-in-out 0s";
-    var dir = dir==="right" ? "right" : "left";
+  function transitionTo(selector, url, dir, speed, easing, onend) {
+    speed = speed || 800;
+    easing = easing || "ease-in-out 0s";
+    dir = dir==="right" ? "right" : "left";
     
     $.get(url, function(data) {
     
       var xmldoc = $.parseHTML(data);
-      var title = $('<div />').html(unescape(data.match(/<title>([\s\S]*?)<\/title>/)[1].trim())).text();
+      var title = $('<div />').html(decodeURIComponent(data.match(/<title>([\s\S]*?)<\/title>/)[1].trim())).text();
       document.title = title;
       
       var element = $(selector);
@@ -59,7 +62,10 @@
         element.css("width", original_width);
         copy.remove();
         cleaned = true;
-      }
+        if (onend) {
+          onend();
+        }
+      };
       
       element.one(tend_evt, cleanup);
       
@@ -85,22 +91,50 @@
   }
   
   function activate(selector, linklist) {
-  
+    var curpage = linklist.indexOf(window.location.pathname);
+    if (curpage<0) { return; } //we're apparently not on a path we're supposed to be, ignore the request
+    
     var returns = {
-      onstarttransition: function() {},
-      onleftbound: function() {},
-      onrightbound: function() {},
-    }
+      onStartTransition: function() {},
+      onEndTransition: function() {},
+      onLeftBound: function() {},
+      onRightBound: function() {},
+      left: function(duration) {
+
+        var pos = linklist.indexOf(window.location.pathname);
+        if (pos<0) { return; } //we're apparently not on a path we're supposed to be
+        if (pos===(linklist.length-1)) { //On the boundary already. Do a bounce animation? Expand a sidebar?
+                returns.onRightBound();
+                return;
+        }
+          
+        returns.onStartTransition(selector, linklist[pos+1], "left", duration);
+        transitionTo(selector, linklist[pos+1], "left", duration, null, returns.onEndTransition);
+        history.pushState({contentarea: selector, link: linklist[pos+1], dir: "left"}, "Swipeleft page", linklist[pos+1]);
+      },
+      right: function(duration) {
+        var pos = linklist.indexOf(window.location.pathname);
+        if (pos<0) { return; } //we're apparently not on a path we're supposed to be
+        if (pos===0) { //On the boundary already. Do a bounce animation? Expand a sidebar?
+          returns.onLeftBound();
+          return;
+        }
+        
+        returns.onStartTransition(selector, linklist[pos-1], "right", duration);
+        transitionTo(selector, linklist[pos-1], "right", duration, null, returns.onEndTransition);
+        history.pushState({contentarea: selector, link: linklist[pos-1], dir: "right"}, "Swiperight page", linklist[pos-1]);
+      }
+    };
 
     var element = document.querySelector(selector);
     var pos = linklist.indexOf(window.location.pathname);
     
     history.pushState({contentarea: selector, link: linklist[pos]}, document.title, window.location.pathname);
     
-    Hammer(element, { 
+    (new Hammer.Instance(element, { 
       prevent_default: true,
       no_mouseevents: true
-    }).on("swipeleft swiperight", function(ev) {
+    })).on("swipeleft swiperight", function(ev) {
     
       if (!ev.gesture) { return; }
       
@@ -110,32 +144,20 @@
       var pos = linklist.indexOf(window.location.pathname);
       if (pos<0) { return; } //we're apparently not on a path we're supposed to be
       if (ev.type === "swipeleft") {
-        if (pos===(linklist.length-1)) { //On the boundary already. Do a bounce animation? Expand a sidebar?
-          returns.onrightbound();
-        } else { //Push state and animate to new page
-          returns.onstarttransition(selector, linklist[pos+1], "left", duration);
-          transitionTo(selector, linklist[pos+1], "left", duration);
-          history.pushState({contentarea: selector, link: linklist[pos+1], dir: "left"}, "Swipeleft page", linklist[pos+1]);
-        }
+        returns.left(duration);
       } else { //swiperight
-        if (pos===0) { //On the boundary already. Do a bounce animation? Expand a sidebar?
-          returns.onleftbound();
-        } else { //Push state and animate to new page
-          returns.onstarttransition(selector, linklist[pos-1], "right", duration);
-          transitionTo(selector, linklist[pos-1], "right", duration);
-          history.pushState({contentarea: selector, link: linklist[pos-1], dir: "right"}, "Swiperight page", linklist[pos-1]);
-        }
+        returns.right(duration);
       }
     });
     
     window.onpopstate = function(data) {
-      returns.onstarttransition(data.state.contentarea, data.state.link, data.state.dir, 800);
-      transitionTo(data.state.contentarea, data.state.link, data.state.dir);
+      returns.onStartTransition(data.state.contentarea, data.state.link, data.state.dir, 800);
+      transitionTo(data.state.contentarea, data.state.link, data.state.dir, null, null, returns.onEndTransition);
     };
   
     return returns;
   }
     
-  window.sideswipe = activate;
+  window.Sideswipe = activate;
 
 })(this);
