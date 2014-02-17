@@ -3,7 +3,7 @@ var swipe = null;
 $(document).ready(function () {
   'use strict';
   
-  swipe = Sideswipe('.container', ['/', '/pages/1.html', '/pages/2.html', '/pages/3.html']);
+  swipe = Sideswipe('.container', ['/sideswipe.js/', '/sideswipe.js/pages/1.html', '/sideswipe.js/pages/2.html', '/sideswipe.js/pages/3.html']);
   //swipe will be null if this is called on a page not in the array
   
   swipe.onStartTransition = function(selector, url, dir, dur) {
