@@ -1,0 +1,38 @@
+.page {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  display: table;
+}
+
+.full {
+  height: 100%;
+  width: 100%;
+  display: table-cell;
+  vertical-align: middle;
+  background: radial-gradient( ellipse, #fff, #888);
+}
+
+.center {
+  text-align: center;
+}
+
+.left {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  height: 0 auto;
+  bottom: 50%;
+}
+
+.right {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  height: 0 auto;
+  bottom: 50%;
+}
+
+.disabled {
+  visibility: hidden;
+}

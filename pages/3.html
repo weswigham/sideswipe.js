@@ -18,11 +18,22 @@
   
   <div class="page">
     <div class="jumbotron full"> 
-      <div class="left disabled" onclick="left()"><h1><span class="glyphicon glyphicon-chevron-left"></span></h1></div>
-      <div class="right" onclick="right()"><h1><span class="glyphicon glyphicon-chevron-right"></span></h1></div>
-      <div class="container">
-        <h1 class="center">sideswipe.js</h1>
-        <p class="center">Swipe left to navigate.</p>
+      <div class="left" onclick="left()"><h1><span class="glyphicon glyphicon-chevron-left"></span></h1></div>
+      <div class="right disabled" onclick="right()"><h1><span class="glyphicon glyphicon-chevron-right"></span></h1></div>
+     <div class="container" side-onload="hljs.highlightBlock(document.querySelector('code'))">
+        <h1 class="center">Powerful when you need it</h1>
+        <pre><code>
+  swipe.onStartTransition = function(selector, url, dir, dur) {
+    $('.left').removeClass('disabled');
+    $('.right').removeClass('disabled');
+    if (url=='/') {
+      $('.left').addClass('disabled');
+    }
+    if (url=='/pages/3.html') {
+      $('.right').addClass('disabled');
+    }
+  }
+        </code></pre>
       </div>
     </div>
   </div>
