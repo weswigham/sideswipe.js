@@ -27,19 +27,23 @@
       var hard_width = element.width();
       
       
+      var preheight = element.height();
       element.hide(); //PRETEND LIKE IT'S NOT THERE SO WE CAN FIGURE HOW HOW BIG THE NEW ONE IS
       element.after(copy);
       var copypos = copy.offset();
       var copywidth = copy.width();
       var copyheight = copy.height();
       element.show();
+      var minheight = preheight>copyheight ? preheight : copyheight;
+      
+      element.parent().append('<div id="sideswipehfix"></div>')
+      var hfix = $('#sideswipehfix').css('height', minheight); //Used to make sure the parent div is large enough
       
       copy.css("position","absolute"); //Now they're exactly on top of one another...
+      
       copy.width(copywidth);
       copy.height(copyheight);
       copy.offset(copypos);
-      
-      
       
       if (dir==="right") {
         dist = dist * -1;
@@ -59,6 +63,7 @@
       var cleaned = false;
       var cleanup = function(){
         if (cleaned) { return; }
+        hfix.remove();
         element.html(copy.html());
         element.css("transition", original_trans);
         element.css("left", original_left);
