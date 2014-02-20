@@ -9,10 +9,10 @@ $(document).ready(function () {
   swipe.onStartTransition = function(selector, url, dir, dur) {
     $('.left').removeClass('disabled');
     $('.right').removeClass('disabled');
-    if (url=='/') {
+    if (url=='/sideswipe.js/') {
       $('.left').addClass('disabled');
     }
-    if (url=='/pages/3.html') {
+    if (url=='/sideswipe.js/pages/3.html') {
       $('.right').addClass('disabled');
     }
   }
