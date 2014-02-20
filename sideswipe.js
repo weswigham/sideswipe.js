@@ -158,7 +158,7 @@
     history.pushState({contentarea: selector, link: linklist[pos]}, document.title, window.location.pathname);
     
     (new Hammer.Instance(element, { 
-      prevent_default: true,
+      prevent_default: false,
       no_mouseevents: true
     })).on("swipeleft swiperight", function(ev) {
     
